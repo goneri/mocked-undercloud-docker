@@ -1,0 +1,8 @@
+[Unit]
+Description=Mock the docker daemon
+
+[Service]
+ExecStart=/usr/bin/read
+
+[Install]
+WantedBy=multi-user.target

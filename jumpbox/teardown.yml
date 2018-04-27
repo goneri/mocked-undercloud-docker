@@ -1,0 +1,3 @@
+---
+- command: halt
+  become: True

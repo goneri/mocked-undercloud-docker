@@ -1,0 +1,79 @@
+---
+- name: Recreate the ~/.ssh directory
+  file:
+    path: /var/lib/dci-ansible-agent/.ssh
+    state: '{{ item }}'
+  with_items:
+    - absent
+    - directory
+- name: Ensure the dci-ansible-agent can use root ssh key
+  command: /bin/cp -pr /root/.ssh /var/lib/dci-ansible-agent
+  become: True
+- file:
+    path: /var/lib/dci-ansible-agent/.ssh
+    owner: dci-ansible-agent
+    group: dci-ansible-agent
+    recurse: True
+  become: True
+- shell: ssh-keygen -f /var/lib/dci-ansible-agent/.ssh/id_rsa -N '' -y > /var/lib/dci-ansible-agent/.ssh/id_rsa.pub
+- name: Drop the wait file to let the main script continue
+  file:
+    path: /shared/wait
+    state: absent
+  become: True
+- name: Wait for the undercloud_ip file to be present
+  wait_for:
+    path: /shared/undercloud_ip
+    state: present
+- name: Load the undercloud_ip address
+  command: cat /shared/undercloud_ip
+  register: cat_output
+- debug:
+    var: cat_output
+- set_fact:
+    undercloud_ip: '{{ cat_output.stdout }}'
+- name: Add root@undercloud to inventory
+  add_host:
+    name: "undercloud-root"
+    ansible_fqdn: "{{ undercloud_ip }}"
+    ansible_user: "root"
+    ansible_host: "{{ undercloud_ip }}"
+- copy:
+    src: '{{ item }}'
+    dest: '/etc/yum.repos.d/{{ item | basename }}'
+  delegate_to: undercloud-root
+  with_items:
+    - /etc/yum.repos.d/rhel.repo
+    - /etc/yum.repos.d/dci.repo
+    - /var/www/html/dci_repo/dci_repo.repo
+- package:
+    name: openstack-tempest
+    state: present
+  delegate_to: undercloud-root
+- shell: |
+    test -f /usr/share/openstack-tempest-13.0.0/tools/config_tempest.py || exit 0
+    echo 'exit 0' > /usr/share/openstack-tempest-13.0.0/tools/config_tempest.py
+  delegate_to: undercloud-root
+- shell: |
+    echo 'exit 0' > /usr/bin/tempest
+  delegate_to: undercloud-root
+- copy:
+    dest: '/home/stack/{{ item }}'
+    content: |
+
+      export OS_AUTH_URL=a
+      export OS_PASSWORD=a
+      export OS_USERNAME=a
+  with_items:
+    - stackrc
+    - overcloudrc
+  delegate_to: undercloud-root
+- copy:
+    content: exit 0
+    dest: '/usr/local/bin/{{ item }}'
+    mode: '755'
+  with_items:
+    - openstack
+    - neutron
+    - ostestr
+  delegate_to: undercloud-root
