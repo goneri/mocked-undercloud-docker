@@ -12,7 +12,6 @@ if [ -n $DEV ]; then
     dev_mode="-v ${HOME}/git_repos/dci-ansible-agent:/usr/share/dci-ansible-agent -v ${HOME}/git_repos/dci-ansible/modules:/usr/share/dci/modules -v ${HOME}/git_repos/dci-ansible/callback:/usr/share/dci/callback -v ${HOME}/git_repos/dci-ansible/module_utils:/usr/share/dci/module_utils"
 fi
 
-# REQUIREMENT: echo 'INSECURE_REGISTRY=\'--insecure-registry 172.0.0.0/8' > /etc/sysconfig/docker-latest
 if [ ! -f jumpbox/id_rsa ]; then
     ssh-keygen -t rsa -N "" -f jumpbox/id_rsa
     cp ~/.ssh/id_rsa.pub jumpbox/authorized_keys
