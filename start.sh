@@ -2,9 +2,14 @@
 set -eux
 
 dci_topic=$1
+dev_mode=""
 
 if [ -z $dci_topic ]; then
     echo "Usage: $0 <TOPIC>"
+fi
+
+if [ -n $DEV ]; then
+    dev_mode="-v ${HOME}/git_repos/dci-ansible-agent:/usr/share/dci-ansible-agent -v ${HOME}/git_repos/dci-ansible/modules:/usr/share/dci/modules -v ${HOME}/git_repos/dci-ansible/callback:/usr/share/dci/callback -v ${HOME}/git_repos/dci-ansible/module_utils:/usr/share/dci/module_utils"
 fi
 
 # REQUIREMENT: echo 'INSECURE_REGISTRY=\'--insecure-registry 172.0.0.0/8' > /etc/sysconfig/docker-latest
@@ -27,7 +32,7 @@ touch shared/$dci_topic/wait
 test -d data || mkdir data
 sudo chmod 777 data
 
-docker run --cpu-quota="50000" --blkio-weight 1000 -d -v /run/docker.sock:/run/docker.sock -v $PWD/shared:/shared -v $PWD/data:/var/lib/dci-ansible-agent -v /home/goneri/git_repos/dci-ansible-agent:/usr/share/dci-ansible-agent --stop-timeout=1 -i --name jumpbox-instance_${dci_topic,,} jumpbox_${dci_topic,,}
+docker run --cpu-quota="50000" --blkio-weight 1000 -d -v /run/docker.sock:/run/docker.sock -v $PWD/shared:/shared -v $PWD/data:/var/lib/dci-ansible-agent ${dev_mode} --stop-timeout=1 -i --name jumpbox-instance_${dci_topic,,} jumpbox_${dci_topic,,}
 jumpbox_ip=$(docker inspect jumpbox-instance_${dci_topic,,}|jq -r .[].NetworkSettings.IPAddress)
 
 father_pid_file=/proc/$$
