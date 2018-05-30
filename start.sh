@@ -54,11 +54,4 @@ father_pid_file=/proc/$$
 sleep 5
 ssh root@${jumpbox_ip} systemctl start dci-ansible-agent
 
-# sleep 5
-# while ! ssh root@172.17.0.4 systemctl is-active dci-ansible-agent|grep failed; do
-#     echo "Waiting"
-#     sleep 5
-# done
-# docker rm -f undercloud-instance
-# docker rm -f jumpbox-instance
 wait
