@@ -19,7 +19,7 @@ COPY authorized_keys /root/.ssh/authorized_keys
 RUN chmod 644 /root/.ssh/authorized_keys
 
 RUN printf "tempest_config: true\ntempest_overcloud: true\nrun_tempest: false\n" >> /etc/dci-ansible-agent/settings.yml
-COPY dcirc.sh /etc/dci-ansible-agent
+COPY dcirc_${DCI_TOPIC}.sh /etc/dci-ansible-agent/dcirc.sh
 COPY running.yml /etc/dci-ansible-agent/hooks
 COPY teardown.yml /etc/dci-ansible-agent/hooks
 

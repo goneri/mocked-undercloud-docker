@@ -19,7 +19,7 @@ if [ ! -f jumpbox/id_rsa ]; then
     cat ~/.ssh/id_rsa.pub >> undercloud/authorized_keys
 fi
 
-cp ~/dcirc_goneri_${dci_topic}.sh jumpbox/dcirc.sh
+cp ~/dcirc_goneri_${dci_topic}.sh jumpbox/dcirc_${dci_topic}.sh
 sudo docker build -t jumpbox_${dci_topic,,} --build-arg DCI_TOPIC=${dci_topic} jumpbox
 sudo docker build -t undercloud_${dci_topic,,} undercloud
 docker inspect jumpbox-instance_${dci_topic,,} && docker rm -f jumpbox-instance_${dci_topic,,}
