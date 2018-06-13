@@ -18,13 +18,14 @@ RUN chmod 600 /root/.ssh/id_rsa
 COPY authorized_keys /root/.ssh/authorized_keys
 RUN chmod 644 /root/.ssh/authorized_keys
 
-RUN printf "tempest_config: true\ntempest_overcloud: true\nrun_tempest: false\n" >> /etc/dci-ansible-agent/settings.yml
+RUN printf "tempest_config: false\nrun_tempest: false\ninventory: undercloud\nrun_tripleo_validations: false\nrun_tripleo_validations_setup: false\nskip_certification_role: false\n" >> /etc/dci-ansible-agent/settings.yml
 COPY dcirc_${DCI_TOPIC}.sh /etc/dci-ansible-agent/dcirc.sh
 COPY running.yml /etc/dci-ansible-agent/hooks
 COPY teardown.yml /etc/dci-ansible-agent/hooks
 
 COPY chronyc /usr/local/bin
 COPY docker.service /etc/systemd/system/docker.service
+COPY dci-ansible-agent.service /etc/systemd/system/dci-ansible-agent.service
 
 EXPOSE 80
 EXPOSE 5000
