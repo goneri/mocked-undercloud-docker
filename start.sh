@@ -28,11 +28,11 @@ test -d shared/$dci_topic && rm -r shared/$dci_topic
 mkdir -p shared/$dci_topic
 touch shared/$dci_topic/wait
 
-test -d data || mkdir data
-test -d registry || mkdir registry
-sudo chmod 777 data registry
+test -d data/data || mkdir -p data/data
+test -d data/registry || mkdir data/registry
+sudo chmod 777 data/data data/registry
 
-docker run --cpu-quota="50000" --blkio-weight 1000 -d -v /run/docker.sock:/run/docker.sock -v $PWD/shared:/shared -v $PWD/data:/var/lib/dci-ansible-agent -v $PWD/registry:/var/lib/registry ${dev_mode} --stop-timeout=2 -i --name jumpbox-instance_${dci_topic,,} jumpbox_${dci_topic,,}
+docker run --cpu-quota="50000" --blkio-weight 1000 -d -v /run/docker.sock:/run/docker.sock -v $PWD/shared:/shared -v $PWD/data/data:/var/lib/dci-ansible-agent -v $PWD/data/registry:/var/lib/registry ${dev_mode} --stop-timeout=2 -i --name jumpbox-instance_${dci_topic,,} jumpbox_${dci_topic,,}
 jumpbox_ip=$(docker inspect jumpbox-instance_${dci_topic,,}|jq -r .[].NetworkSettings.IPAddress)
 
 father_pid_file=/proc/$$
